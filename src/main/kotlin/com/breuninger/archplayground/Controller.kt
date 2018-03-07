@@ -13,7 +13,7 @@ import java.util.*
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-
+@CrossOrigin
 @RestController
 class Controller {
 
