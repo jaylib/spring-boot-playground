@@ -17,4 +17,5 @@ class CardService(private val cardRepository: CardRepository) {
     }
 
     fun getId(id: UUID) = cardRepository.findById(id)
+    fun findAll() = cardRepository.findAll()
 }
