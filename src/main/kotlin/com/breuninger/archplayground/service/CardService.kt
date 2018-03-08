@@ -1,6 +1,5 @@
 package com.breuninger.archplayground.service
 
-import com.breuninger.archplayground.NewCard
 import com.breuninger.archplayground.model.Card
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
@@ -19,3 +18,5 @@ class CardService(private val cardRepository: CardRepository) {
     fun getId(id: UUID) = cardRepository.findById(id)
     fun findAll() = cardRepository.findAll()
 }
+
+data class NewCard(val title: String, val author: String, val greetingText: String)

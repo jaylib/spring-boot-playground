@@ -14,11 +14,11 @@ open class DemoService(private val cardService: CardService) {
     val webClient: WebClient = WebClient.create("http://localhost:8089/cards")
 
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 15000)
     fun newYear() {
 
         webClient.get().retrieve().bodyToFlux(Card::class.java).subscribe { it
-            println(it)
+//            println(it)
 //            cardService.createCard(NewCard(it.title, it.author, it.greetingText)).subscribe()
         }
 

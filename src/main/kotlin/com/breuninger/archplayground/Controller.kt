@@ -1,7 +1,11 @@
 package com.breuninger.archplayground
 
 import com.breuninger.archplayground.model.Card
+import com.breuninger.archplayground.model.Comment
 import com.breuninger.archplayground.service.CardService
+import com.breuninger.archplayground.service.CommentService
+import com.breuninger.archplayground.service.NewCard
+import com.breuninger.archplayground.service.NewComment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -20,6 +24,9 @@ class Controller {
     @Autowired
     lateinit var cardService: CardService
 
+    @Autowired
+    lateinit var commentService: CommentService
+
     @PostMapping("/cards")
     fun createCard(@RequestBody card: NewCard): Mono<Card>? {
         return cardService.createCard(card)
@@ -30,6 +37,13 @@ class Controller {
 
     @GetMapping("/cards")
     fun getCards() = cardService.findAll()
+
+    @GetMapping("/cards/{cardId}/comments")
+    fun getComments(@PathVariable("cardId") cardId: UUID) = commentService.findAll(cardId)
+
+    @PostMapping("/cards/{cardId}/comments")
+    fun createComment(@PathVariable("cardId") cardId: String, @RequestBody comment: NewComment): Mono<Comment>? {
+        return commentService.createComment(NewComment(comment.text, comment.author), UUID.fromString(cardId))
+    }
 }
 
-data class NewCard(val title: String, val author: String, val greetingText: String)
