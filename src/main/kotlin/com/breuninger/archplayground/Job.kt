@@ -16,8 +16,8 @@ open class JobFetcher(private val cardService: CardService) {
 
     @Scheduled(fixedRate = 7000)
     fun fetchCards() {
-        webClient.get().retrieve().bodyToFlux(NewCard::class.java).subscribe { it
-            cardService.createCard(NewCard(it.id, it.title, it.author, it.greetingText)).subscribe()
-        }
+//        webClient.get().retrieve().bodyToFlux(NewCard::class.java).subscribe { it
+//            cardService.createCard(NewCard(it.id, it.title, it.author, it.greetingText)).subscribe()
+//        }
     }
 }

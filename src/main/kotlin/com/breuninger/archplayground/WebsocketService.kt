@@ -1,13 +1,11 @@
 package com.breuninger.archplayground
 
 import com.breuninger.archplayground.model.Card
+import com.breuninger.archplayground.model.Comment
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Service
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
@@ -21,7 +19,7 @@ class User(val id: Long, val name: String)
 
 //@Scope(value="singleton")
 @Component
-class CardHandler : TextWebSocketHandler() {
+class Broadcaster : TextWebSocketHandler() {
 
     val sessionList = HashMap<WebSocketSession, User>()
     var uids = AtomicLong(0)
@@ -39,33 +37,26 @@ class CardHandler : TextWebSocketHandler() {
 
     public override fun handleTextMessage(session: WebSocketSession?, message: TextMessage?) {
         val json = ObjectMapper().readTree(message?.payload)
-//         {type: "join/say", data: "name/msg"}
         when (json.get("type").asText()) {
             "join" -> {
                 val user = User(uids.getAndIncrement(), json.get("data").asText())
                 sessionList.put(session!!, user)
-                // tell this user about all other users
-//                emit(session, Message("users", sessionList.values))
-//                // tell all other users, about this user
-//                broadcastToOthers(session, Message("join", user))
-            }
-            "say" -> {
-//                broadcast(Message("say", json.get("data").asText()))
             }
         }
     }
 
-    fun emit(session: WebSocketSession, card: Card) = session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(card)))
-    fun broadcast(card: Card) {
-        sessionList.forEach { emit(it.key, card) }
+    fun emitData(session: WebSocketSession, type: String, data: Any) = session.sendMessage(TextMessage("{ \"type\": \"$type\", \"data\": " + jacksonObjectMapper().writeValueAsString(data) + "}"))
+
+    fun broadcast(type: String, data: Any) {
+        sessionList.forEach { emitData(it.key, type, data) }
     }
-    fun broadcastToOthers(me: WebSocketSession, card: Card) = sessionList.filterNot { it.key == me }.forEach { emit(it.key, card) }
+
 }
 
 @Configuration
 @EnableWebSocket
-open class WSConfig(private val cardHandler: CardHandler) : WebSocketConfigurer {
+open class WSConfig(private val cardHandler: Broadcaster) : WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(cardHandler, "/chat").setAllowedOrigins("*").withSockJS()
+        registry.addHandler(cardHandler, "/messages").setAllowedOrigins("*").withSockJS()
     }
 }
